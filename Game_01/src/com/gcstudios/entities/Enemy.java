@@ -30,7 +30,6 @@ public class Enemy extends Entity{
 		sprites[0] = Game.spritesheet.getSprite(112, 16, 16, 16);
 		sprites[1] = Game.spritesheet.getSprite(112+16, 16, 16, 16);
 	}
-	
 
 	public void tick() {
 		
@@ -40,8 +39,6 @@ public class Enemy extends Entity{
 		maskw = 5;
 		maskh = 5;
 		*/
-		
-		
 		if(this.isCliddingWithPlayer() == false) {			
 		
 		if((int)x < Game.player.getX() && World.isFree((int)(x+speed),  this.getY())
