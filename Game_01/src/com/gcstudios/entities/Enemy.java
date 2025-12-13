@@ -32,12 +32,14 @@ public class Enemy extends Entity{
 	}
 
 	public void tick() {
+		
 		/*
 		maskx = 8;
 		masky = 8;
 		maskw = 5;
 		maskh = 5;
 		*/
+		
 		if(this.isCliddingWithPlayer() == false) {			
 		
 		if((int)x < Game.player.getX() && World.isFree((int)(x+speed),  this.getY())
