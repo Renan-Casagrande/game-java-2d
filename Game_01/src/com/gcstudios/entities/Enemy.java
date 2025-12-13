@@ -31,8 +31,7 @@ public class Enemy extends Entity{
 		sprites[1] = Game.spritesheet.getSprite(112+16, 16, 16, 16);
 	}
 
-	public void tick() {
-		
+	public void tick() {		
 		/*
 		maskx = 8;
 		masky = 8;
@@ -142,5 +141,6 @@ public class Enemy extends Entity{
 			
 		//g.setColor(Color.blue);
 		//g.fillRect(this.getX() + maskx - Camera.x, this.getY() + masky - Camera.y, maskw, maskh);
+		//teste
 	}
 }
