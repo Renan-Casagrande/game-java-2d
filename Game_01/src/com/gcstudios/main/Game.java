@@ -5,6 +5,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
@@ -35,8 +36,9 @@ public class Game extends Canvas implements Runnable,KeyListener,MouseListener{
 	private boolean isRunning = true;
 	public static final int WIDTH = 240;
 	public static final int HEIGHT = 160;
-	private final int SCALE = 3;
+	public static final int SCALE = 3;
 	
+	private int CUR_LEVEL = 1, MAX_LEVEL = 2;
 	private BufferedImage image;	
 	
 	public static List<Entity> entities;
@@ -53,7 +55,15 @@ public class Game extends Canvas implements Runnable,KeyListener,MouseListener{
 	
 	public UI ui;
 	
+	public static String gameState = "MENU";	
+	private boolean showMessageGameOver = true;
+	private int framesGameOver = 0;
+	private boolean restartGame = false;
+	
+	public Menu menu;
+	
 	public Game() {
+		Sound.musicBackground.loop();
 		rand = new Random();
 		addKeyListener(this);
 		addMouseListener(this);
@@ -68,8 +78,9 @@ public class Game extends Canvas implements Runnable,KeyListener,MouseListener{
 		spritesheet = new Spritesheet("/spritesheet.png");
 		player = new Player(0,0,16,16,spritesheet.getSprite(32, 0, 16, 16));
 		entities.add(player);	
-		world = new World("/map.png");
+		world = new World("/level1.png");
 		
+		menu = new Menu();
 	}
 	
 	public void initFrame() {
@@ -103,6 +114,8 @@ public class Game extends Canvas implements Runnable,KeyListener,MouseListener{
 	}
 	
 	public void tick() {
+		if(gameState.equals("NORMAL")) {	
+			this.restartGame = false;
 		for(int i = 0; i < entities.size(); i ++) {
 			Entity e = entities.get(i);			
 			e.tick();
@@ -111,9 +124,46 @@ public class Game extends Canvas implements Runnable,KeyListener,MouseListener{
 		for(int i = 0; i < bullets.size(); i++) {
 			bullets.get(i).tick();
 		}
+		
+		if(enemies.size() == 0) {
+			//System.out.println("");
+			// Avancar para o proxio level.
+			CUR_LEVEL ++;
+			if(CUR_LEVEL > MAX_LEVEL) {
+				CUR_LEVEL = 1;
+			}
+			String newWorld = "level"+CUR_LEVEL+".png";
+			World.restartGame(newWorld);
+		}
+		}else if(gameState.equals("GAME_OVER")) {
+			this.framesGameOver++;
+			if(this.framesGameOver == 30){
+				this.framesGameOver = 0;
+				if(this.showMessageGameOver)
+					this.showMessageGameOver = false;
+					else
+						this.showMessageGameOver = true;
+			}
+			if(restartGame) {
+				 restartGame = false;
+				 framesGameOver = 0;
+				 showMessageGameOver = true;
+
+				 CUR_LEVEL = 1;
+				 Game.gameState = "NORMAL"; // 🔴 ESSENCIAL
+
+				 String newWorld = "level"+CUR_LEVEL+".png";
+				 World.restartGame(newWorld);
+			}
+		}else if(gameState == "MENU") {
+			
+			menu.tick();
+	
+		}
 	}
 
 	public void render() {
+		this.restartGame = false;		
 		BufferStrategy bs = this.getBufferStrategy();
 		if(bs == null) {
 			this.createBufferStrategy(3);
@@ -141,6 +191,19 @@ public class Game extends Canvas implements Runnable,KeyListener,MouseListener{
 		g.setFont(new Font("arial", Font.BOLD,20));
 		g.setColor(Color.white);
 		g.drawString("Munição: " + player.ammo,580,20);
+		if(gameState.equals("GAME_OVER")) {
+			Graphics2D g2 = (Graphics2D) g;
+			g2.setColor(new Color(0,0,0,100));
+			g2.fillRect(0, 0, WIDTH*SCALE, HEIGHT*SCALE);
+			g.setFont(new Font("arial", Font.BOLD,36));
+			g.setColor(Color.white);
+			g.drawString("Game Over",(WIDTH*SCALE) / 2 - 75, (HEIGHT*SCALE) / 2);
+			g.setFont(new Font("arial", Font.BOLD,28));
+			if(showMessageGameOver)
+			g.drawString(">Pressione Enter para reiniciar<",(WIDTH*SCALE) / 2 - 200, (HEIGHT*SCALE) / 2 + 40);
+		}else if(gameState == "MENU"){
+			menu.render(g);
+		}
 		bs.show();
 	}
 	
@@ -194,13 +257,33 @@ public class Game extends Canvas implements Runnable,KeyListener,MouseListener{
 		if(e.getKeyCode() == KeyEvent.VK_UP ||
 				e.getKeyCode() == KeyEvent.VK_W) {	
 			player.up = true;
+			if(gameState == "MENU") {
+				menu.up = true;
+			}
+			
 		}else if(e.getKeyCode() == KeyEvent.VK_DOWN ||
 					e.getKeyCode() == KeyEvent.VK_S) {
 			player.down = true;
+			
+			if(gameState == "MENU") {
+				menu.down = true;
+			}
 		}
 		
 		if(e.getKeyCode() == KeyEvent.VK_SPACE) {
 			player.shoot = true;
+		}
+		
+		if(e.getKeyCode() == KeyEvent.VK_ENTER) {
+			this.restartGame = true;
+			if(gameState == "MENU") {
+				menu.enter = true;
+			}
+		}
+		
+		if(e.getKeyCode() == KeyEvent.VK_ESCAPE) {
+			gameState = "MENU";
+			menu.pause = true;
 		}
 	}
 

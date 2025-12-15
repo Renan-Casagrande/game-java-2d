@@ -6,6 +6,7 @@ import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 
 import com.gcstudios.main.Game;
+import com.gcstudios.main.Sound;
 import com.gcstudios.world.Camera;
 import com.gcstudios.world.World;
 
@@ -59,7 +60,8 @@ public class Enemy extends Entity{
 		}
 		}else {
 			// Estamos colidindo
-			if(Game.rand.nextInt(100) < 10) {			
+			if(Game.rand.nextInt(100) < 10) {	
+				Sound.hurtEffect.play();
 				Game.player.life-=Game.rand.nextInt(3);
 				Game.player.isDamaged = true;
 				
@@ -93,8 +95,8 @@ public class Enemy extends Entity{
 	}
 	
 	public void destroySelf() {
-		Game.entities.remove(this);
 		Game.enemies.remove(this);
+		Game.entities.remove(this);		
 	}
 	
 	public void collidingBullet() {

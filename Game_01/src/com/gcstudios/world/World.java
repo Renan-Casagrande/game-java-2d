@@ -3,6 +3,7 @@ package com.gcstudios.world;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.util.ArrayList;
 
 import javax.imageio.ImageIO;
 
@@ -10,7 +11,9 @@ import com.gcstudios.entities.Bullet;
 import com.gcstudios.entities.Enemy;
 import com.gcstudios.entities.Entity;
 import com.gcstudios.entities.Lifepack;
+import com.gcstudios.entities.Player;
 import com.gcstudios.entities.Weapon;
+import com.gcstudios.graficos.Spritesheet;
 import com.gcstudios.main.Game;
 
 public class World {
@@ -83,6 +86,18 @@ public class World {
 				(tiles[x2 + (y2*World.WIDTH)] instanceof WallTile) ||
 				(tiles[x3 + (y3*World.WIDTH)] instanceof WallTile) ||
 				(tiles[x4 + (y4*World.WIDTH)] instanceof WallTile));
+	}
+	
+	public static void restartGame(String level) {
+		Game.entities.clear();
+		Game.enemies.clear();
+		Game.entities = new ArrayList<Entity>();
+		Game.enemies = new ArrayList<Enemy>();
+		Game.spritesheet = new Spritesheet("/spritesheet.png");
+		Game.player = new Player(0,0,16,16,Game.spritesheet.getSprite(32, 0, 16, 16));
+		Game.entities.add(Game.player);	
+		Game.world = new World("/"+level);
+		return;
 	}
 	
 	public void render(Graphics g) {
