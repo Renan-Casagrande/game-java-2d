@@ -10,6 +10,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
@@ -28,7 +29,7 @@ import com.gcstudios.world.Camera;
 import com.gcstudios.world.World;
 
 
-public class Game extends Canvas implements Runnable,KeyListener,MouseListener{
+public class Game extends Canvas implements Runnable,KeyListener,MouseListener,MouseMotionListener{
 	
 	private static final long serialVersionUID = 1L;
 	public static JFrame frame;
@@ -38,7 +39,8 @@ public class Game extends Canvas implements Runnable,KeyListener,MouseListener{
 	public static final int HEIGHT = 160;
 	public static final int SCALE = 3;
 	
-	private int CUR_LEVEL = 1, MAX_LEVEL = 2;
+	public static int CUR_LEVEL = 1;
+	public static int MAX_LEVEL = 2;
 	private BufferedImage image;	
 	
 	public static List<Entity> entities;
@@ -61,12 +63,19 @@ public class Game extends Canvas implements Runnable,KeyListener,MouseListener{
 	private boolean restartGame = false;
 	
 	public Menu menu;
+	public static int[] pixels;
+	public static int[] lightMap;
+	
+	public boolean saveGame = false;
+	
+	public int mx,my;
 	
 	public Game() {
 		Sound.musicBackground.loop();
 		rand = new Random();
 		addKeyListener(this);
 		addMouseListener(this);
+		addMouseMotionListener(this);
 		setPreferredSize(new Dimension(WIDTH*SCALE,HEIGHT*SCALE));
 		initFrame();
 		//Iniciando objetos.
@@ -75,6 +84,7 @@ public class Game extends Canvas implements Runnable,KeyListener,MouseListener{
 		entities = new ArrayList<Entity>();
 		enemies = new ArrayList<Enemy>();
 		bullets = new ArrayList<BulletShoot>();
+		
 		spritesheet = new Spritesheet("/spritesheet.png");
 		player = new Player(0,0,16,16,spritesheet.getSprite(32, 0, 16, 16));
 		entities.add(player);	
@@ -114,8 +124,15 @@ public class Game extends Canvas implements Runnable,KeyListener,MouseListener{
 	}
 	
 	public void tick() {
-		if(gameState.equals("NORMAL")) {	
-			this.restartGame = false;
+		if(gameState.equals("NORMAL")) {
+			if(this.saveGame) {
+				this.saveGame = false;
+				String[] opt1 = {"level","vida"};
+				int[] opt2 = {Game.CUR_LEVEL,(int) player.life};
+				Menu.saveGame(opt1,opt2,10);
+				System.out.println("Jogo salvo com sucesso!");				
+			}
+		this.restartGame = false;
 		for(int i = 0; i < entities.size(); i ++) {
 			Entity e = entities.get(i);			
 			e.tick();
@@ -132,8 +149,13 @@ public class Game extends Canvas implements Runnable,KeyListener,MouseListener{
 			if(CUR_LEVEL > MAX_LEVEL) {
 				CUR_LEVEL = 1;
 			}
+				
+			int vidaAtual = (int) player.life; // 🔹 guarda a vida
+			
 			String newWorld = "level"+CUR_LEVEL+".png";
 			World.restartGame(newWorld);
+			
+			Game.player.life = vidaAtual;
 		}
 		}else if(gameState.equals("GAME_OVER")) {
 			this.framesGameOver++;
@@ -204,6 +226,16 @@ public class Game extends Canvas implements Runnable,KeyListener,MouseListener{
 		}else if(gameState == "MENU"){
 			menu.render(g);
 		}
+		
+		//Rotacionar objetos.
+		/*
+		Graphics2D g2 = (Graphics2D) g;
+		double angleMouse = Math.atan2(200+25 - my,200+25 - mx);
+		g2.rotate(angleMouse,200+25,200+25);
+		g.setColor(Color.red);
+		g.fillRect(200,200,50,50);
+		*/
+		
 		bs.show();
 	}
 	
@@ -245,6 +277,12 @@ public class Game extends Canvas implements Runnable,KeyListener,MouseListener{
 
 	@Override
 	public void keyPressed(KeyEvent e) {
+		
+		if(e.getKeyCode() == KeyEvent.VK_Z) {
+			player.jump = true;
+			
+		}
+		
 		if(e.getKeyCode() == KeyEvent.VK_RIGHT ||
 				e.getKeyCode() == KeyEvent.VK_D){
 			player.right = true;
@@ -270,7 +308,7 @@ public class Game extends Canvas implements Runnable,KeyListener,MouseListener{
 			}
 		}
 		
-		if(e.getKeyCode() == KeyEvent.VK_SPACE) {
+		if(e.getKeyCode() == KeyEvent.VK_X) {
 			player.shoot = true;
 		}
 		
@@ -284,6 +322,11 @@ public class Game extends Canvas implements Runnable,KeyListener,MouseListener{
 		if(e.getKeyCode() == KeyEvent.VK_ESCAPE) {
 			gameState = "MENU";
 			menu.pause = true;
+		}
+		
+		if(e.getKeyCode() == KeyEvent.VK_SPACE) {
+			if(gameState == "NORMAL")
+			this.saveGame = true;
 		}
 	}
 
@@ -336,6 +379,19 @@ public class Game extends Canvas implements Runnable,KeyListener,MouseListener{
 	@Override
 	public void mouseExited(MouseEvent e) {
 		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mouseDragged(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mouseMoved(MouseEvent e) {
+		this.mx = e.getX();
+		this.my = e.getY();
 		
 	}
 }

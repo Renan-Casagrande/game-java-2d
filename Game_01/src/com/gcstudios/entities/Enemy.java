@@ -39,6 +39,9 @@ public class Enemy extends Entity{
 		maskw = 5;
 		maskh = 5;
 		*/
+		
+		if(this.calculateDistance(this.getX(), this.getY(), Game.player.getX(), Game.player.getY()) < 70) {
+			
 		if(this.isCliddingWithPlayer() == false) {			
 		
 		if((int)x < Game.player.getX() && World.isFree((int)(x+speed),  this.getY())
@@ -67,6 +70,9 @@ public class Enemy extends Entity{
 				
 				System.out.println("Vida: "+ Game.player.life);
 			}
+		}
+		}else {
+			
 		}
 		
 		frames++;

@@ -1,5 +1,6 @@
 package com.gcstudios.entities;
 
+import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
@@ -14,7 +15,7 @@ public class Player extends Entity{
 	public boolean right,up,left,down;
 	public int right_dir = 0,left_dir = 1;
 	public int dir = right_dir;
-	public double speed = 1.4;
+	public double speed = 1.2;
 	
 	private int frames = 0, maxFrames = 5, index = 0, maxIndex = 3;
 	private boolean moved = false;
@@ -34,6 +35,14 @@ public class Player extends Entity{
 	
 	public double life = 100, maxlife = 100;
 	public int mx,my;
+	
+	public boolean jump = false;	
+	public boolean isJumping = false;	
+	public int z = 0;	
+	public int jumpFrames = 50,jumpCur = 0;
+	public boolean jumpUp = false, jumpDown = false;
+	public int jumpSpd = 1;
+	public int zplayer = 0;
 
 	public Player(int x, int y, int width, int height, BufferedImage sprite) {
 		super(x, y, width, height, sprite);
@@ -51,6 +60,37 @@ public class Player extends Entity{
 	}
 	
 	public void tick() {
+		
+		if(jump) {
+		    if(!isJumping) {
+		        jump = false;
+		        isJumping = true;
+		        jumpUp = true;
+		        jumpCur = 0;
+		    }
+		}
+
+		if(isJumping) {
+		    if(jumpUp) {
+		        jumpCur += 2;
+		    } else if(jumpDown) {
+		        jumpCur -= 2;
+		        if(jumpCur <= 0) {
+		            jumpCur = 0;
+		            isJumping = false;
+		            jumpDown = false;
+		            jumpUp = false;
+		        }
+		    }
+
+		    z = jumpCur;
+
+		    if(jumpCur >= jumpFrames) {
+		        jumpUp = false;
+		        jumpDown = true;
+		    }
+		}
+		
 		moved = false;
 		if(right && World.isFree((int)(x+speed), this.getY())) {
 			moved = true;
@@ -203,27 +243,32 @@ public class Player extends Entity{
 	public void render(Graphics g) {
 		if(!isDamaged) {
 			if(dir == right_dir) {
-				g.drawImage(rightPlayer[index], this.getX() - Camera.x, this.getY() - Camera.y, null);
+				g.drawImage(rightPlayer[index], this.getX() - Camera.x, this.getY() - Camera.y - z, null);
 				if(arma) {
 					//Desenhar arma para direita.
-					g.drawImage(Entity.GUN_RIGHT, this.getX()+8 - Camera.x, this.getY() - Camera.y, null);
+					g.drawImage(Entity.GUN_RIGHT, this.getX()+8 - Camera.x, this.getY() - Camera.y - z, null);
 				}
 			}else if(dir == left_dir) {
-				g.drawImage(leftPlayer[index], this.getX() - Camera.x, this.getY() - Camera.y, null);
+				g.drawImage(leftPlayer[index], this.getX() - Camera.x, this.getY() - Camera.y - z, null);
 				if(arma) {
 					//Desenha arma para esquerda.
-					g.drawImage(Entity.GUN_LEFT, this.getX()-8 - Camera.x, this.getY() - Camera.y, null);
+					g.drawImage(Entity.GUN_LEFT, this.getX()-8 - Camera.x, this.getY() - Camera.y - z, null);
 				}
 			}			
 		}else {
-			g.drawImage(playerDamage, this.getX()-Camera.x, this.getY()-Camera.y, null);
+			g.drawImage(playerDamage, this.getX()-Camera.x, this.getY()-Camera.y - z, null);
 			if(arma) {
 				if(dir == left_dir) {
-					g.drawImage(Entity.GUN_DAMEGE_LEFT, this.getX() - 8 - Camera.x, this.getY() - Camera.y, null);
+					g.drawImage(Entity.GUN_DAMEGE_LEFT, this.getX() - 8 - Camera.x, this.getY() - Camera.y - z, null);
 				}else {
-					g.drawImage(Entity.GUN_DAMAGE_RIGHT, this.getX() + 8 - Camera.x, this.getY() - Camera.y, null);
+					g.drawImage(Entity.GUN_DAMAGE_RIGHT, this.getX() + 8 - Camera.x, this.getY() - Camera.y - z, null);
 				}
 			}
 		}
+		
+		if(isJumping ) {
+			g.setColor(Color.black);
+			g.fillOval(this.getX()-Camera.x + 5, this.getY()-Camera.y + 16,9,6);
+		}		
 	}
 }
