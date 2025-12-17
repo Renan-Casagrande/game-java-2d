@@ -101,6 +101,7 @@ public class World {
 	public static void restartGame(String level) {
 		Game.entities.clear();
 		Game.enemies.clear();
+		Game.bullets.clear();
 		Game.entities = new ArrayList<Entity>();
 		Game.enemies = new ArrayList<Enemy>();
 		Game.spritesheet = new Spritesheet("/spritesheet.png");
