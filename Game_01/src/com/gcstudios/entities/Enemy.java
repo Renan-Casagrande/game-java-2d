@@ -47,8 +47,7 @@ public class Enemy extends Entity{
 				path = AStar.findPath(Game.world, start, end);
 			}
 		
-			if(Game.rand.nextInt(100) < 5) {
-				Sound.hurtEffect.play();
+			if(Game.rand.nextInt(100) < 5) {				
 				Game.player.life-=Game.rand.nextInt(3);
 				Game.player.isDamaged = true;
 			}

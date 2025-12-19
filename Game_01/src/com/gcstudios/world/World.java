@@ -108,7 +108,14 @@ public class World {
 		Game.player = new Player(0,0,16,16,Game.spritesheet.getSprite(32, 0, 16, 16));
 		Game.entities.add(Game.player);	
 		Game.world = new World("/"+level);
-		return;
+		
+		// 🔴 ESSENCIAL: recriar minimapa
+	    Game.minimapa = new BufferedImage(World.WIDTH, World.HEIGHT, BufferedImage.TYPE_INT_RGB);
+	    Game.minimapaPixels =
+	        ((java.awt.image.DataBufferInt) Game.minimapa
+	            .getRaster()
+	            .getDataBuffer())
+	        .getData();		
 	}
 	
 	public void render(Graphics g) {
@@ -126,5 +133,31 @@ public class World {
 				tile.render(g);
 			}
 		}
+	}
+	
+	public static void renderMiniMap() {
+		for(int i = 0; i < Game.minimapaPixels.length; i++) {
+			Game.minimapaPixels[i] = 0;
+		}
+		for(int xx = 0; xx < WIDTH; xx++) {
+			for(int yy = 0; yy < HEIGHT; yy++) {
+				int index = xx + (yy * WIDTH);
+	            if (index < 0 || index >= Game.minimapaPixels.length)
+	                continue;
+
+	            if (tiles[index] instanceof WallTile) {
+	                Game.minimapaPixels[index] = 0xff0000;
+	            }
+	        }
+	    }
+
+	    int xPlayer = Game.player.getX() / 16;
+	    int yPlayer = Game.player.getY() / 16;
+
+	    if (xPlayer >= 0 && yPlayer >= 0 &&
+	        xPlayer < WIDTH && yPlayer < HEIGHT) {
+
+	        Game.minimapaPixels[xPlayer + (yPlayer * WIDTH)] = 0x0000ff;
+	    }
 	}
 }

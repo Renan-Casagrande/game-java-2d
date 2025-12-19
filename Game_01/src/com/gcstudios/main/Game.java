@@ -13,6 +13,7 @@ import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
+import java.awt.image.DataBufferInt;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -66,13 +67,16 @@ public class Game extends Canvas implements Runnable,KeyListener,MouseListener,M
 	public Menu menu;
 	public static int[] pixels;
 	public static int[] lightMap;
+	public static int[] minimapaPixels;
+	
+	public static BufferedImage minimapa;
 	
 	public boolean saveGame = false;
 	
 	public int mx,my;
 	
 	public Game() {
-		Sound.musicBackground.loop();
+		//Sound.musicBackground.loop();
 		rand = new Random();
 		addKeyListener(this);
 		addMouseListener(this);
@@ -82,6 +86,7 @@ public class Game extends Canvas implements Runnable,KeyListener,MouseListener,M
 		//Iniciando objetos.
 		ui = new UI();
 		image = new BufferedImage(WIDTH, HEIGHT, BufferedImage.TYPE_INT_RGB);
+		pixels = ((DataBufferInt)image.getRaster().getDataBuffer()).getData();
 		entities = new ArrayList<Entity>();
 		enemies = new ArrayList<Enemy>();
 		bullets = new ArrayList<BulletShoot>();
@@ -91,6 +96,9 @@ public class Game extends Canvas implements Runnable,KeyListener,MouseListener,M
 		entities.add(player);	
 		world = new World("/level1.png");
 		
+		minimapa = new BufferedImage(World.WIDTH,World.HEIGHT,BufferedImage.TYPE_INT_RGB);
+		minimapaPixels = ((DataBufferInt)minimapa.getRaster().getDataBuffer()).getData();
+		
 		menu = new Menu();
 	}
 	
@@ -99,6 +107,9 @@ public class Game extends Canvas implements Runnable,KeyListener,MouseListener,M
 		frame.add(this);
 		frame.setResizable(false);
 		frame.pack();
+		
+		//Icone da janela
+		
 		frame.setLocationRelativeTo(null);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setVisible(true);
@@ -228,6 +239,8 @@ public class Game extends Canvas implements Runnable,KeyListener,MouseListener,M
 		}else if(gameState == "MENU"){
 			menu.render(g);
 		}
+		World.renderMiniMap();
+		g.drawImage(minimapa, 617, 30, 100, 100,null);
 		
 		//Rotacionar objetos.
 		/*
@@ -242,6 +255,7 @@ public class Game extends Canvas implements Runnable,KeyListener,MouseListener,M
 	}
 	
 	public void run() {
+		requestFocus(); 
 		long lastTime = System.nanoTime();
 		double anountOfTicks = 60.0;
 		double ns = 1000000000 / anountOfTicks;

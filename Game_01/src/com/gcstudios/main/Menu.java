@@ -47,6 +47,7 @@ public class Menu {
 				currentOption = 0;
 		}
 		if(enter) {
+			Sound.music.loop();
 			enter = false;
 			if(options[currentOption].equals("novo jogo") || options[currentOption].equals("continuar")) {
 				Game.gameState = "NORMAL";
